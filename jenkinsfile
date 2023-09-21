@@ -1,0 +1,103 @@
+pipeline {
+    agent any
+    triggers {
+  cron('0 06 ***')
+    }
+
+    tools {
+        // Install the Maven version configured as "M3" and add it to the path.
+        maven "Maven"
+        jdk "OpenJDK"
+    }
+    
+    environment {
+        SCANNER_HOME= tool 'sonar-scanner'
+    }
+    stages {
+        stage('Git Checkout') {
+            steps {
+                script {
+                    git url: 'https://github.com/17-kajal/DevTestOps1.git'
+                    
+                }
+                }
+            }
+        
+        stage('Build'){
+             steps {
+                script {
+                    bat "mvn clean compile - DskipTests=true"
+                    
+                
+                }
+            }
+            
+        }
+        
+        
+        stage('Unit tests'){
+             steps {
+                script {
+                    bat "mvn test"
+                    
+                
+                }
+            }
+            
+        }
+        
+        stage('Qquality Analysis'){
+             steps {
+                script {
+                    withSonarQubeEnv(installationName: 'Sonar', credentialsId: 'Token_Sonar'){
+                        bat "mvn sonar:sonar"
+                    }
+                    
+                
+                }
+            }
+            
+        }
+        
+        
+        stage('Deploy'){
+             steps {
+                echo "Deploying to prod"
+                    
+                
+                }
+            }
+            
+        
+        stage('Publish to artifactory'){
+             steps {
+                rtMavenDeployer(
+                    id: 'deployer',
+                    serverID: 'jfrog_server',
+                    releaseRepo: 'example-repo-local',
+                    snapshotRepo: 'example-repo-local',
+                )
+                rtMavenRun(
+                    pom: 'pom.xml',
+                    goals: 'clean install',
+                    deployerId: ' deployer'
+                    )
+                rtPublishBuildInfo(
+                    serverId: 'jfrog_server'
+                    )
+                    
+            }
+            
+        }
+    }
+            post {
+                // If Maven was able to run the tests, even if some of the test
+                // failed, record the test results and archive the jar file.
+                success {
+                    junit '**/target/surefire-reports/TEST-*.xml'
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+
+
