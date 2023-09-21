@@ -23,7 +23,7 @@ pipeline {
         stage('Build'){
              steps {
                 script {
-                    bat "mvn clean compile - DskipTests=true"
+                    bat "mvn clean compile"
                     
                 
                 }
