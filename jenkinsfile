@@ -69,26 +69,6 @@ pipeline {
             }
             
         
-        /*stage('Publish to artifactory'){
-             steps {
-                rtMavenDeployer(
-                    id: 'deployer',
-                    serverID: 'jfrog_server',
-                    releaseRepo: 'example-repo-local',
-                    snapshotRepo: 'example-repo-local',
-                )
-                rtMavenRun(
-                    pom: 'pom.xml',
-                    goals: 'clean install',
-                    deployerId: ' deployer'
-                    )
-                rtPublishBuildInfo(
-                    serverId: 'jfrog_server'
-                    )
-                    
-            }
-            
-        }*/
     }
             post {
                 // If Maven was able to run the tests, even if some of the test
